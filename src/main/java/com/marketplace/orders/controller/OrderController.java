@@ -2,6 +2,7 @@ package com.marketplace.orders.controller;
 
 import com.marketplace.orders.dto.OrderRequest;
 import com.marketplace.orders.dto.OrderResponse;
+import com.marketplace.orders.dto.OrderStatisticsResponse;
 import com.marketplace.orders.dto.PageResponse;
 import com.marketplace.orders.service.OrderService;
 import jakarta.validation.Valid;
@@ -63,6 +64,9 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.shipOrder(orderId));
     }
 
-
+    @GetMapping("/statistics")
+    public ResponseEntity<OrderStatisticsResponse> statistics(){
+        return  ResponseEntity.status(HttpStatus.OK).body(orderService.getEstatitics());
+    }
 
 }

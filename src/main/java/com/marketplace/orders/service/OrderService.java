@@ -2,6 +2,7 @@ package com.marketplace.orders.service;
 
 import com.marketplace.orders.dto.OrderRequest;
 import com.marketplace.orders.dto.OrderResponse;
+import com.marketplace.orders.dto.OrderStatisticsResponse;
 import com.marketplace.orders.dto.PageResponse;
 import com.marketplace.orders.entity.Order;
 import com.marketplace.orders.entity.OrderItem;
@@ -18,7 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -182,6 +185,29 @@ public class OrderService {
     orderRepository.save(order);
 
     return OrderResponse.fromEntity(order);
+  }
+
+  public OrderStatisticsResponse  getEstatitics(){
+    List<Order> orders = orderRepository.findAll();
+
+    if(orders.isEmpty()){
+      throw new ResourceNotFoundException("No orders found");
+    }
+
+   OrderStatisticsResponse response =  OrderStatisticsResponse.builder()
+           .totalOrders(orders.size())
+           .totalRevenue(orders.stream()
+                   .map(Order::getTotal)
+                   .reduce(BigDecimal.ZERO, BigDecimal::add))
+           .countByStatus(orders.stream()
+                   .collect(Collectors.groupingBy(Order::getStatus, Collectors.counting())))
+           .averageTicket(orders.stream()
+                   .map(Order::getTotal)
+                   .reduce(BigDecimal.ZERO, BigDecimal::add)
+                   .divide(BigDecimal.valueOf(orders.size()), BigDecimal.ROUND_HALF_UP))
+           .build();
+
+   return response;
   }
 
 }
